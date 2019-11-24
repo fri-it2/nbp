@@ -9,8 +9,8 @@ gray_patch = mpatches.Patch(color='gray', label='1200kbps')
 yellow_patch = mpatches.Patch(color='yellow', label='4Mbps')
 
 import matplotlib.pyplot as plt
-edgelist = pd.read_csv('/home/cefizelj/Documents/nbp-doktorat/omrezje.csv')
-nodelist = pd.read_csv('/home/cefizelj/Documents/nbp-doktorat/vozlisce.csv')
+edgelist = pd.read_csv('/home/home/Documents/nbp-doktorat/omrezje.csv')
+nodelist = pd.read_csv('/home/home/Documents/nbp-doktorat/vozlisce.csv')
 g = nx.Graph()
 for i, elrow in edgelist.iterrows():
     g.add_edge(elrow[0], elrow[1], attr_dict=elrow[2:].to_dict())
