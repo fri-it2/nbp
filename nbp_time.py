@@ -18,7 +18,7 @@ SLIP_ESC_ESC = 0xDD
 readBufferQueue = deque([])
 chs = string.digits + string.ascii_uppercase
 bytedate=[]
-byteArray = [
+byteArray2 = [
                     255,
                     255,
                     255,
@@ -27,8 +27,6 @@ byteArray = [
                     13,
                     241,
                     38, 16, 14, 19, 93,
-
-                    255, 255, 255,255,
                     0,
                     0,
                     0,
@@ -49,19 +47,59 @@ byteArray = [
                     47,
                     47,
                     47,
-                    ord('>'),ord('!')
+                    ord('>'),ord('!'),]
+byteArray1=[240, 13, 241, 38, 16, 14, 19, 93, 80, 34, 19, 93, 144, 0, 16, 60, 176, 10, 16, 60, 80, 101, 106, 107, 96, 106, 106, 107, 80, 58, 71, 74, 96, 63, 71, 74, 96, 161, 13, 52, 128, 171, 13, 52]
+
+#0, 206, 16, 1
+byteArray = [
+                    255,
+                    255,
+                    255,
+                    255,
+
                 ]
+
+byteArray_ost = [
+                 0,
+                 0,
+                 0,
+                 0,
+                 240,
+                 13,
+                 241,
+                 38,
+
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 47,
+                 47,
+                 47,
+                 47,
+ord('>'),ord('!')]
+byteArray=byteArray+byteArray1+byteArray_ost
 def read(timebyte):
     print timebyte
     writeToSerialPort(timebyte)
     while True:
         time.sleep(0.0000001)
         data = serial_port.read()
-
+        print ord(data)
         if ord(data) == ord('!'):
+            print ord(data)
             return
 
 def do_time( bytedate):
+    """
+    This function measure
+    :param bytedate:
+    :return:
+    """
     t = timeit.Timer("read("+str(bytedate)+")")
 
     time = t.timeit(1)
@@ -104,5 +142,10 @@ def encodeToSLIP( byteList):
 import __builtin__
 __builtin__.__dict__.update(locals())
 
-t=do_time(byteArray)
-print(t)
+while True:
+    t=do_time(byteArray2)
+    time.sleep(0.0002)
+    with open('S53FE.csv', 'a') as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerow(str(t))
+    print(t)
