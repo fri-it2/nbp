@@ -1,17 +1,17 @@
-from datetime import datetime
+datetime import datetime
 from threading import Thread
 import time
 import serial
 from collections import deque
 import json
-
+import datetime
 import string
 import csv
 import timeit
 
 stevilovozlisc = 0
 SLIP_END = 0xC0  # declared in hexa Frame End
-serial_port = serial.Serial(port='/dev/ttyUSB0', baudrate=115200)
+serial_port = serial.Serial(port='/dev/ttyUSB1', baudrate=115200, timeout=1)
 SLIP_ESC = 0xDB  # Frame Escape
 SLIP_ESC_END = 0xDC  # transposed Frame End
 SLIP_ESC_ESC = 0xDD
@@ -82,17 +82,65 @@ byteArray_ost = [
                  47,
                  47,
 ord('>'),ord('!')]
+# do ptp-JA
+byteArrayPTP = [
+                    255,
+                    255,
+                    255,
+                    255,
+                    240,
+                    13,
+                    241,
+                    38, 16, 14, 19, 93]
+bytearryPTdoFE = [176, 10, 16, 60]+[96, 106, 106, 107]+[128, 73, 71, 74]+[128, 171, 13, 52]
+bytearrayMuci =   [ 0,
+                    0,
+                    0,
+                    0,
+                    240,
+                    13,
+                    241,
+                    38,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    47,
+                    47,
+                    47,
+                    47,
+                    ord('>'),ord('!')]
+pot = byteArrayPTP + byteArrayPTP + bytearrayMuci
+
 byteArray=byteArray+byteArray1+byteArray_ost
 def read(timebyte):
     print timebyte
-    writeToSerialPort(timebyte)
     while True:
-        time.sleep(0.0000001)
-        data = serial_port.read()
-        print ord(data)
-        if ord(data) == ord('!'):
-            print ord(data)
-            return
+        writeToSerialPort(timebyte)
+        start_time = time.time()
+        while True:
+            if ((time.time()-start_time)>9):
+                break
+
+            time.sleep(0.0000001)
+
+            data = serial_port.read()
+            #print ord(data)
+            if len(data) ==  0:
+                break
+            if ord(data) == ord('>'):
+                data = serial_port.read()
+                if len(data)==0:
+                    break
+                if ord(data)==ord('!'):
+                    return
+
+
+
 
 def do_time( bytedate):
     """
@@ -143,9 +191,13 @@ import __builtin__
 __builtin__.__dict__.update(locals())
 
 while True:
-    t=do_time(byteArray2)
-    time.sleep(0.0002)
-    with open('S53FE.csv', 'a') as csvFile:
-        writer = csv.writer(csvFile)
-        writer.writerow(str(t))
+    t=do_time(pot)
+    time.sleep(1)
+    with open('S53FE.csv', 'a') as csvfile:
+        writer = csv.writer(csvfile, delimiter=' ',quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        #writer = csv.DictWriter(csvFile, fieldnames=fieldnames)
+        #t={'cas:'+''+str(t)+'','datum:'+'+str(datetime.datetime.now())+'''}
+        t=[str(t)]+[str(datetime.datetime.now())]
+        print(t)
+        writer.writerow(t)
     print(t)
